@@ -1,0 +1,65 @@
+---
+# Source: benchmark-operator/templates/operator.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: benchmark-operator
+  namespace: benchmark-operator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: benchmark-operator
+  template:
+    metadata:
+      labels:
+        control-plane: controller-manager
+        name: benchmark-operator
+    spec:
+      serviceAccountName: benchmark-operator
+      containers:
+        - name: benchmark-operator
+          image: "quay.io/cloud-bulldozer/benchmark-operator:latest"
+          imagePullPolicy: Always
+          env:
+            - name: WATCH_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: OPERATOR_NAME
+              value: "benchmark-operator"
+            - name: WORKER_BENCHMARK_RIPSAW_CLOUDBULLDOZER_IO
+              value: "1"
+            - name: ANSIBLE_VERBOSITY
+              value: "4"
+          volumeMounts:
+          - mountPath: /tmp/ansible-operator/runner
+            name: runner
+        - name: redis-master
+          image: "quay.io/cloud-bulldozer/redis:latest"
+          env:
+            - name: MASTER
+              value: "true"
+            - name: ALLOW_EMPTY_PASSWORD
+              value: "yes"
+          ports:
+            - containerPort: 6379
+          resources:
+            limits:
+              cpu: "0.1"
+          volumeMounts:
+            - mountPath: /redis-master-data
+              name: data
+      tolerations:
+        - effect: NoSchedule
+          key: role
+          value: workload
+      volumes:
+        - name: data
+          emptyDir: {}
+        - name: runner
+          emptyDir: {}

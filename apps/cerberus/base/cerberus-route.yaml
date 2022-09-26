@@ -1,0 +1,14 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: cerberus
+  namespace: cerberus
+  labels:
+    app: cerberus
+spec:
+  port:
+    targetPort: 8080-tcp
+  to:
+    kind: Service
+    name: cerberus
+    weight: 100
