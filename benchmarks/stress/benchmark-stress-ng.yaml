@@ -1,0 +1,18 @@
+apiVersion: ripsaw.cloudbulldozer.io/v1alpha1
+kind: Benchmark
+metadata:
+  name: stressng
+  namespace: benchmark-operator
+spec:
+  metadata:
+    collection: false
+  workload:
+    name: "stressng"
+    args:
+      # general options
+      runtype: "parallel"
+      timeout: "300"
+      instances: 2
+      # cpu stressor options
+      cpu_stressors: "1"
+      cpu_percentage: "50"
